@@ -44,9 +44,11 @@ class Game {
 
     update(){
         console.log("UPDATE SIM");
+
         let currentTime = Date.now();
         let dt = currentTime - this.#lastUpdate;
         this.#lastUpdate = currentTime; 
+        //Tracks how far the simulation is behind the real world.
         this.#simLag = this.#simLag + dt - 600;
         console.log(`DT= ${dt}`);
         console.log(`Sim LAG = ${this.#simLag}`);
@@ -57,12 +59,8 @@ class Game {
         //Catch the server up to gameworld time by scheduling next update to be elapseTime - tickRate
         //Start polling event queue with the lastUpdateTime
  
-        let update = EventSystem.eventFactory(Events.UpdateSimulation);
-        update.data.timeStamp = this.#lastUpdate;
-
-        let timer = 600 - this.#simLag;
-
-        EventSystem.scheduleEvent(update, timer > 0 ? timer : 0);
+        let update = EventSystem.eventFactory(Events.UpdateSimulation, {timeStamp: this.#lastUpdate});
+        EventSystem.scheduleEvent(update, this.#simLag > Constants.GAME_TICK ? 0 : Constants.GAME_TICK - this.#simLag);
     }
 
     pollEventQueue(){
